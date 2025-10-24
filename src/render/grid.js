@@ -20,7 +20,7 @@ export function dibujarCuadricula(ctx, tamañoBloque, filas, columnas) {
 
 export function dibujarCentrosDeCeldas(ctx, tamañoBloque, filas, columnas) {
     const centros = [];
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     for (let i = 0; i < filas; i++) {
         centros[i] = [];
         for (let j = 0; j < columnas; j++) {
@@ -28,7 +28,7 @@ export function dibujarCentrosDeCeldas(ctx, tamañoBloque, filas, columnas) {
             const centroY = i * tamañoBloque + tamañoBloque / 2;
             centros[i][j] = [centroX, centroY];
             ctx.beginPath();
-            ctx.arc(centroX, centroY, 3, 0, 2 * Math.PI);
+            ctx.arc(centroX, centroY, 2, 0, 2 * Math.PI);
             ctx.fill();
         }
     }

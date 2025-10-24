@@ -3,7 +3,7 @@
  */
 import { getBloqueSize, color } from './canvas.js';
 
-export function dibujarPuntaFlecha(ctx, camino) {
+export function dibujarPuntaFlecha(ctx, centros, camino) {
     const BLOQUE_TAM = getBloqueSize();
     
     //a partir de los ultimos nodos recorridos calcular la direccion de la flecha
@@ -20,32 +20,32 @@ export function dibujarPuntaFlecha(ctx, camino) {
      */
     //calcular direccion en base a los dos puntos
     const [dirFila, dirCol] = [filaFin - filaInicio, colFin - colInicio];
-
-    const centroX = colFin * BLOQUE_TAM + (BLOQUE_TAM / 2);
-    const centroY = filaFin * BLOQUE_TAM + (BLOQUE_TAM / 2);
+    //centros 
+    const centroX = centros[filaFin][colFin][0];
+    const centroY = centros[filaFin][colFin][1];
 
     // Tamaño de la punta de flecha (proporcional al tamaño del bloque)
-    const tamFlecha = BLOQUE_TAM * 0.4;
+    const tamFlecha = BLOQUE_TAM * 0.3;
 
     ctx.beginPath();
     
     if (dirFila === 1 && dirCol === 0) {
-        // Abajo ↓
+        // Abajo 
         ctx.moveTo(centroX, centroY + tamFlecha / 2);
         ctx.lineTo(centroX - tamFlecha / 2, centroY - tamFlecha / 2);
         ctx.lineTo(centroX + tamFlecha / 2, centroY - tamFlecha / 2);
     } else if (dirFila === 0 && dirCol === 1) {
-        // Derecha →
+        // Derecha 
         ctx.moveTo(centroX + tamFlecha / 2, centroY);
         ctx.lineTo(centroX - tamFlecha / 2, centroY - tamFlecha / 2);
         ctx.lineTo(centroX - tamFlecha / 2, centroY + tamFlecha / 2);
     } else if (dirFila === -1 && dirCol === 0) {
-        // Arriba ↑
+        // Arriba 
         ctx.moveTo(centroX, centroY - tamFlecha / 2);
         ctx.lineTo(centroX - tamFlecha / 2, centroY + tamFlecha / 2);
         ctx.lineTo(centroX + tamFlecha / 2, centroY + tamFlecha / 2);
     } else if (dirFila === 0 && dirCol === -1) {
-        // Izquierda ←
+        // Izquierda 
         ctx.moveTo(centroX - tamFlecha / 2, centroY);
         ctx.lineTo(centroX + tamFlecha / 2, centroY - tamFlecha / 2);
         ctx.lineTo(centroX + tamFlecha / 2, centroY + tamFlecha / 2);
