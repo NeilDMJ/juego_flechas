@@ -43,6 +43,152 @@ body {
 .barra-opciones{
   display: flex;
   justify-content: space-evenly;
-  width: 10vh;
-  height: 10vh;
+  align-items: center;
+  gap: 10px;
+  width: 80vh;
+  height: auto;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.barra-opciones > div {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.barra-opciones select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  width: 100%;
+  max-width: 150px;
+}
+ 
+/* Responsivo para pantallas pequeñas */
+
+/* Tablets y pantallas medianas (hasta 768px) */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .contenedor-principal {
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .tablero-principal {
+    width: 90vw;
+    height: 90vw;
+    max-width: 500px;
+    max-height: 500px;
+  }
+
+  .barra-opciones {
+    width: 90vw;
+    max-width: 500px;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .barra-opciones select {
+    font-size: 12px;
+    padding: 6px;
+    max-width: 120px;
+  }
+}
+
+/* Móviles en vertical (hasta 480px) */
+@media (max-width: 480px) {
+  body {
+    padding: 5px;
+  }
+
+  .contenedor-principal {
+    gap: 8px;
+  }
+
+  .tablero-principal {
+    width: 95vw;
+    height: 95vw;
+    max-width: 400px;
+    max-height: 400px;
+    padding: 3px;
+    border-width: 1px;
+  }
+
+  .barra-opciones {
+    width: 95vw;
+    max-width: 400px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
+    height: auto;
+  }
+
+  .barra-opciones > div {
+    width: 100%;
+  }
+
+  .barra-opciones select {
+    font-size: 14px;
+    padding: 10px;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .barra-opciones label {
+    width: 100%;
+  }
+}
+
+/* Móviles pequeños (hasta 360px) */
+@media (max-width: 360px) {
+  .tablero-principal {
+    width: 98vw;
+    height: 98vw;
+    max-width: 340px;
+    max-height: 340px;
+  }
+
+  .barra-opciones {
+    width: 98vw;
+    max-width: 340px;
+  }
+}
+
+/* Modo paisaje en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+  body {
+    padding: 5px;
+  }
+
+  .contenedor-principal {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .tablero-principal {
+    width: 70vh;
+    height: 70vh;
+    max-width: 70vh;
+    max-height: 70vh;
+  }
+
+  .barra-opciones {
+    flex-direction: column;
+    width: auto;
+    height: 70vh;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .barra-opciones select {
+    width: 120px;
+  }
 }
