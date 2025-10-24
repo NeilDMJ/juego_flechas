@@ -2,6 +2,7 @@
  * Algoritmos de búsqueda de caminos
  */
 import { obtenerAdyacentes, generarTablero} from './tablero.js';
+import { calcularDireccion } from '../render/arrows.js';
 
 function getKey(nodo) {
     return `${nodo[0]},${nodo[1]}`;
@@ -59,7 +60,7 @@ export function DFS(tablero, nodoInicio, nodoFinal) {
 }
 
 export function buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options = {}) {
-    const { maxLongitud , maxIntentos } = options;
+    const { maxLongitud = tablero.length * 2, maxIntentos = 5 } = options;
     
     let camino = DFS(tablero, nodoInicio, nodoFinal);
     let intentos = 1;
@@ -78,8 +79,12 @@ export function buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options 
     }
     
     if (camino.length > maxLongitud) {
-        console.warn(`No se encontró camino con longitud <= ${maxLongitud} después de ${maxIntentos} intentos`);
-        return [];
+        buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options);
+    }
+
+    if (!caminoValido(camino, tablero)) {
+        console.log('Camino no valido, buscando de nuevo');
+        buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options);
     }
     
     return camino;
@@ -109,3 +114,53 @@ export function espaciosLibres(tablero) {
 }
 
 
+
+
+function caminoValido(camino, tablero){
+    if (camino.length <= 6) return true; // camino muy corto
+    
+    const direccion = calcularDireccion(camino);
+    let actual = camino[camino.length - 1]; // ultimo
+    
+    const posicionesCamino = new Set();
+    for (const [fila, col] of camino) {
+        posicionesCamino.add(`${fila},${col}`);
+    }
+    
+    // avanzazr en la direccion de la punta
+    while (true) {
+        let siguiente;
+        if (direccion === 1) {
+            // Arriba
+            siguiente = [actual[0] - 1, actual[1]];
+        } else if (direccion === 2) {
+            // Derecha
+            siguiente = [actual[0], actual[1] + 1];
+        } else if (direccion === 3) {
+            // Abajo
+            siguiente = [actual[0] + 1, actual[1]];
+        } else if (direccion === 4) {
+            // Izquierda
+            siguiente = [actual[0], actual[1] - 1];
+        } else {
+            return true; // Dirección inválida, asumimos válido
+        }
+        
+        // verificar si sale
+        if (siguiente[0] < 0 || siguiente[0] >= tablero.length || 
+            siguiente[1] < 0 || siguiente[1] >= tablero[0].length) {
+            return true; // salio sin chocar
+        }
+        
+        // Verificar si choca ESPECÍFICAMENTE con su propio cuerpo
+        const siguienteKey = `${siguiente[0]},${siguiente[1]}`;
+        if (posicionesCamino.has(siguienteKey)) {
+            return false; // Choca con su propio cuerpo
+        }
+        
+        //vacio avanza
+        if (tablero[siguiente[0]][siguiente[1]] === 0) {
+            actual = siguiente;
+        }
+    }
+}

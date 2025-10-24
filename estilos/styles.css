@@ -25,7 +25,6 @@ body {
 }
 
 .tablero-principal{
-    border: 2px solid black;
     border-radius: 10px;
     width: 80vh;
     height: 80vh;
