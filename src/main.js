@@ -31,8 +31,8 @@ function iniciarJuego() {
     console.log('Coordenadas fin:', coordenadasFin);
 
     let camino = buscarCaminoConLongitud(tablero, coordenadasInicio, coordenadasFin, {
-        maxLongitud: tablero.length + tablero.length/2,
-        maxIntentos: 50
+        maxLongitud: tablero.length * 2,
+        maxIntentos: 100
     });
     let caminos = [camino];
     console.log('Camino encontrado:', camino);

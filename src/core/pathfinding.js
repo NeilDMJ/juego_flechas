@@ -60,34 +60,38 @@ export function DFS(tablero, nodoInicio, nodoFinal) {
 }
 
 export function buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options = {}) {
-    const { maxLongitud = tablero.length * 2, maxIntentos = 5 } = options;
+    const { maxLongitud = tablero.length * 2, maxIntentos = 20 } = options;
     
-    let camino = DFS(tablero, nodoInicio, nodoFinal);
-    let intentos = 1;
+    let intentos = 0;
     
-    while (camino.length > maxLongitud && intentos < maxIntentos) {
-        //console.log(`Intento ${intentos}: Camino demasiado largo (${camino.length} > ${maxLongitud}).`);
-        
-        for (let i = 0; i < tablero.length; i++) { //resetear tablero
+    while (intentos < maxIntentos) {
+        // Resetear tablero
+        for (let i = 0; i < tablero.length; i++) {
             for (let j = 0; j < tablero[i].length; j++) {
                 tablero[i][j] = 0;
             }
         }
         
-        camino = DFS(tablero, nodoInicio, nodoFinal);
+        let camino = DFS(tablero, nodoInicio, nodoFinal);
         intentos++;
-    }
-    
-    if (camino.length > maxLongitud) {
-        buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options);
+        
+        // Verificar si el camino cumple con los requisitos
+        if (camino.length === 0) {
+            continue;
+        }
+        
+        if (camino.length > maxLongitud) {
+            continue;
+        }
+        
+        if (!caminoValido(camino, tablero)) {
+            continue;
+        }
+        
+        return camino;
     }
 
-    if (!caminoValido(camino, tablero)) {
-        console.log('Camino no valido, buscando de nuevo');
-        buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options);
-    }
-    
-    return camino;
+    return [];
 }
 
 function generarCaminos(tablero) {
@@ -143,7 +147,7 @@ function caminoValido(camino, tablero){
             // Izquierda
             siguiente = [actual[0], actual[1] - 1];
         } else {
-            return true; // Dirección inválida, asumimos válido
+            return true; // cualquier otra asumimos válido
         }
         
         // verificar si sale
@@ -152,7 +156,6 @@ function caminoValido(camino, tablero){
             return true; // salio sin chocar
         }
         
-        // Verificar si choca ESPECÍFICAMENTE con su propio cuerpo
         const siguienteKey = `${siguiente[0]},${siguiente[1]}`;
         if (posicionesCamino.has(siguienteKey)) {
             return false; // Choca con su propio cuerpo
