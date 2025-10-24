@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="estilos/styles.css">
+</head>
+
+<body>
+    <div class="contenedor-principal">
+        <div class="barra-opciones">
+            <div><label for="forma"><select name="forma" id="forma">
+                        <option value="Cuadrado">Cuadrado</option>
+                        <option value="Circulo">Circulo</option>
+                        <option value="Triangulo">Triangulo</option>
+                    </select></label></div>
+            <div><label for="tamaño"><select name="tamaño" id="tamaño">
+                        <option value="5" selected>Pequeño</option>
+                        <option value="10">Mediano</option>
+                        <option value="15">Grande</option>
+                    </select></label></div>
+            <div><label for="color"><select name="color" id="color">
+                        <option value="red" selected>Rojo</option>
+                        <option value="green">Verde</option>
+                        <option value="blue">Azul</option>
+                    </select></label></div>
+        </div>
+        <div class="tablero-principal">
+            <canvas id="lienzo" width="800" height="800"></canvas>
+        </div>
+    </div>
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
