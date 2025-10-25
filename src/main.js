@@ -10,7 +10,6 @@ let tablero, centros, caminos, columnas;
 let animacionActiva = false;
 
 function iniciarJuego() {
-    console.log('=== INICIANDO JUEGO ===');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     columnas = parseInt(selectFilas.value);
     const BLOQUE_TAM = getBloqueSize();
@@ -25,9 +24,13 @@ function iniciarJuego() {
     tablero = generarTablero(columnas);
     console.log('Tablero generado:', tablero.length);
 
-    const maxCaminos = Math.floor(columnas / 2) + 3;
+    const maxCaminos = columnas * 3;
     console.log('Intentando generar max:', maxCaminos, 'caminos');
-    caminos = generarCaminos(tablero, { maxCaminos, maxLongitud: 10 });
+    caminos = generarCaminos(tablero, { 
+        numCaminos: maxCaminos, 
+        minLongitud: 3, 
+        maxLongitud: 15 
+    });
     
     console.log(`Se generaron ${caminos.length} caminos:`, caminos);
     
@@ -40,7 +43,7 @@ function iniciarJuego() {
         dibujar(ctx, centros, tablero, camino);
     });
     
-    console.log('=== JUEGO INICIADO ===');
+    console.log('inicio');
 }
 
 canvas.addEventListener('click', (event) => {
@@ -106,7 +109,7 @@ canvas.addEventListener('click', (event) => {
             caminos.forEach(c => {
                 dibujar(ctx, centros, tablero, c);
             });
-        }, 150);
+        }, 30);
     } else if (animacionActiva) {
         console.log('Ya hay una animación en curso');
     } else {

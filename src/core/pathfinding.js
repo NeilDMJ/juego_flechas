@@ -106,12 +106,12 @@ export function buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options 
 }
 
 export function generarCaminos(tablero, options = {}) {
-    const { numCaminos = 5, minLongitud = 5, maxLongitud = 10, maxProfundidad = null } = options;
+    const { numCaminos = 5, minLongitud = 2, maxLongitud = 15, maxProfundidad = null } = options;
     const n = tablero.length;
     const caminos = [];
     const celdasOcupadas = new Set();
     
-    for (let intento = 0; intento < numCaminos * 10; intento++) {
+    for (let intento = 0; intento < numCaminos * 20; intento++) {
         if (caminos.length >= numCaminos) break;
         
         let filaInicio = Math.floor(Math.random() * n);
@@ -192,27 +192,31 @@ function caminoValido(camino, tablero, otrosCaminos) {
     const direccion = calcularDireccion(camino);
     const punta = camino[camino.length - 1];
     
+    const distanciaMinima = 3;
+    
     for (const otroCamino of otrosCaminos) {
         const otraDireccion = calcularDireccion(otroCamino);
         const otraPunta = otroCamino[otroCamino.length - 1];
         
-        let celdaEnDireccion;
-        if (direccion === 1) celdaEnDireccion = [punta[0] - 1, punta[1]];
-        else if (direccion === 2) celdaEnDireccion = [punta[0], punta[1] + 1];
-        else if (direccion === 3) celdaEnDireccion = [punta[0] + 1, punta[1]];
-        else if (direccion === 4) celdaEnDireccion = [punta[0], punta[1] - 1];
-        else continue;
-        
-        let otraCeldaEnDireccion;
-        if (otraDireccion === 1) otraCeldaEnDireccion = [otraPunta[0] - 1, otraPunta[1]];
-        else if (otraDireccion === 2) otraCeldaEnDireccion = [otraPunta[0], otraPunta[1] + 1];
-        else if (otraDireccion === 3) otraCeldaEnDireccion = [otraPunta[0] + 1, otraPunta[1]];
-        else if (otraDireccion === 4) otraCeldaEnDireccion = [otraPunta[0], otraPunta[1] - 1];
-        else continue;
-        
-        if (celdaEnDireccion[0] === otraPunta[0] && celdaEnDireccion[1] === otraPunta[1] &&
-            otraCeldaEnDireccion[0] === punta[0] && otraCeldaEnDireccion[1] === punta[1]) {
-            return false;
+        for (let distancia = 1; distancia <= distanciaMinima; distancia++) {
+            let celdaEnDireccion;
+            if (direccion === 1) celdaEnDireccion = [punta[0] - distancia, punta[1]];
+            else if (direccion === 2) celdaEnDireccion = [punta[0], punta[1] + distancia];
+            else if (direccion === 3) celdaEnDireccion = [punta[0] + distancia, punta[1]];
+            else if (direccion === 4) celdaEnDireccion = [punta[0], punta[1] - distancia];
+            else continue;
+            
+            let otraCeldaEnDireccion;
+            if (otraDireccion === 1) otraCeldaEnDireccion = [otraPunta[0] - distancia, otraPunta[1]];
+            else if (otraDireccion === 2) otraCeldaEnDireccion = [otraPunta[0], otraPunta[1] + distancia];
+            else if (otraDireccion === 3) otraCeldaEnDireccion = [otraPunta[0] + distancia, otraPunta[1]];
+            else if (otraDireccion === 4) otraCeldaEnDireccion = [otraPunta[0], otraPunta[1] - distancia];
+            else continue;
+            
+            if (celdaEnDireccion[0] === otraPunta[0] && celdaEnDireccion[1] === otraPunta[1] &&
+                otraCeldaEnDireccion[0] === punta[0] && otraCeldaEnDireccion[1] === punta[1]) {
+                return false;
+            }
         }
     }
     
