@@ -1,7 +1,3 @@
-/**
- * Funciones básicas de dibujo en canvas
- */
-
 import { dibujarPuntaFlecha } from './arrows.js';
 import { generarEnteroAleatorio } from '../core/utils.js';
 import { espaciosLibres , generarCaminos} from '../core/pathfinding.js';
@@ -11,7 +7,6 @@ const color = document.getElementById("color");
 const canvas = document.getElementById("lienzo");
 const ctx = canvas.getContext("2d");
 
-// Función para calcular el tamaño del bloque dinámicamente
 export function getBloqueSize() {
     return canvas.width / parseInt(selectFilas.value);
 }
@@ -28,6 +23,27 @@ export function dibujarLinea(ctx, inicioX, inicioY, finX, finY) {
 }
 
 export function dibujar(ctx, centros, tablero, camino) {
+    if (camino.length === 1) {
+        const [fila, columna] = camino[0];
+        tablero[fila][columna] = 2;
+        
+        const direccion = camino.direccionPrevia || 1;
+        
+        let puntoAnterior;
+        if (direccion === 1) {
+            puntoAnterior = [fila + 1, columna];
+        } else if (direccion === 2) {
+            puntoAnterior = [fila, columna - 1];
+        } else if (direccion === 3) {
+            puntoAnterior = [fila - 1, columna];
+        } else if (direccion === 4) {
+            puntoAnterior = [fila, columna + 1];
+        }
+        
+        const caminoParaDibujar = [puntoAnterior, camino[0]];
+        dibujarPuntaFlecha(ctx, centros, caminoParaDibujar);
+        return;
+    }
 
     for (let i = 0; i < camino.length - 1; i++) {
         const [fila, columna] = camino[i];
@@ -38,10 +54,9 @@ export function dibujar(ctx, centros, tablero, camino) {
 
         if (tablero[fila][columna] === 0 || tablero[fila][columna] === 2) {
             dibujarLinea(ctx, centroInicioX, centroInicioY, centroFinX, centroFinY);
-            tablero[fila][columna] = 1; // dibujado
+            tablero[fila][columna] = 1;
             if (i === camino.length - 2) {
-                tablero[filaSig][columnaSig] = 2; // punta de la flecha
-                // Dibujar punta de flecha
+                tablero[filaSig][columnaSig] = 2;
                 dibujarPuntaFlecha(ctx, centros, camino);
             }
         } else {
@@ -51,7 +66,6 @@ export function dibujar(ctx, centros, tablero, camino) {
 }
 
 export function rellenarConflechas(ctx, centros, tablero) {
-    // Generar menos caminos para tableros pequeños, más para grandes
     const maxCaminos = Math.floor(tablero.length / 2) + 3;
     const caminos = generarCaminos(tablero, maxCaminos);
     

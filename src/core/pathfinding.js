@@ -1,6 +1,3 @@
-/**
- * Algoritmos de búsqueda de caminos
- */
 import { obtenerAdyacentes, generarTablero} from './tablero.js';
 import { calcularDireccion } from '../render/arrows.js';
 import { generarEnteroAleatorio } from './utils.js';
@@ -9,10 +6,9 @@ function getKey(nodo) {
     return `${nodo[0]},${nodo[1]}`;
 }
 
-//Busqueda en profundidad con límite
 export function DFS(tablero, nodoInicio, nodoFinal, maxProfundidad = null) {
     if (!maxProfundidad) {
-        maxProfundidad = tablero.length * tablero.length; // n²
+        maxProfundidad = tablero.length * tablero.length;
     }
     
     let visitado = new Set();
@@ -70,9 +66,10 @@ export function DFS(tablero, nodoInicio, nodoFinal, maxProfundidad = null) {
 }
 
 export function buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options = {}) {
-    const { maxLongitud = tablero.length * 2, maxIntentos = 10 } = options;
+    const { maxLongitud = tablero.length * 2, maxIntentos = 20 } = options;
     
     let intentos = 0;
+    let mejorCamino = [];
     
     while (intentos < maxIntentos) {
         // Resetear tablero
@@ -82,81 +79,77 @@ export function buscarCaminoConLongitud(tablero, nodoInicio, nodoFinal, options 
             }
         }
         
-        let camino = DFS(tablero, nodoInicio, nodoFinal);
+        // Pasar maxLongitud como límite de profundidad a DFS
+        let camino = DFS(tablero, nodoInicio, nodoFinal, maxLongitud);
         intentos++;
         
-        // Verificar si el camino cumple con los requisitos
+        // Si no hay camino, continuar
         if (camino.length === 0) {
             continue;
         }
         
-        if (camino.length > maxLongitud) {
-            continue;
+        // Guardar el mejor camino encontrado (por si no hay válidos)
+        if (mejorCamino.length === 0 || camino.length < mejorCamino.length) {
+            mejorCamino = camino;
         }
         
-        if (!caminoValido(camino, tablero)) {
-            continue;
+        // Si el camino es válido, retornarlo inmediatamente
+        if (caminoValido(camino, tablero)) {
+            return camino;
         }
-        
-        return camino;
     }
-
-    return [];
+    
+    // Si no se encontró camino válido, retornar el mejor encontrado
+    // Esto garantiza al menos una solución
+    console.warn('No se encontró camino válido, retornando mejor camino:', mejorCamino.length);
+    return mejorCamino;
 }
 
-export function generarCaminos(tablero, maxCaminos = 10) {
+export function generarCaminos(tablero, options = {}) {
+    const { numCaminos = 5, minLongitud = 5, maxLongitud = 10, maxProfundidad = null } = options;
+    const n = tablero.length;
     const caminos = [];
-    let intentos = 0;
-    const maxIntentosTotal = maxCaminos * 5;
-    const maxLongitudCamino = Math.min(tablero.length * 3, 30); // Limitar longitud
+    const celdasOcupadas = new Set();
     
-    while (caminos.length < maxCaminos && intentos < maxIntentosTotal) {
-        intentos++;
+    for (let intento = 0; intento < numCaminos * 10; intento++) {
+        if (caminos.length >= numCaminos) break;
         
-        // Encontrar nodos disponibles (optimizado)
-        const nodosDisponibles = [];
-        for (let i = 0; i < tablero.length; i++) {
-            for (let j = 0; j < tablero[i].length; j++) {
-                if (tablero[i][j] === 0) {
-                    nodosDisponibles.push([i, j]);
+        let filaInicio = Math.floor(Math.random() * n);
+        let colInicio = Math.floor(Math.random() * n);
+        
+        const keyInicio = `${filaInicio},${colInicio}`;
+        if (celdasOcupadas.has(keyInicio)) {
+            continue;
+        }
+        
+        let filaFin = Math.floor(Math.random() * n);
+        let colFin = Math.floor(Math.random() * n);
+        const keyFin = `${filaFin},${colFin}`;
+        
+        if (celdasOcupadas.has(keyFin)) {
+            continue;
+        }
+        
+        if (filaInicio === filaFin && colInicio === colFin) {
+            continue;
+        }
+        
+        tablero[filaInicio][colInicio] = 0;
+        tablero[filaFin][colFin] = 0;
+        
+        const camino = DFS(tablero, [filaInicio, colInicio], [filaFin, colFin], maxProfundidad);
+        
+        tablero[filaInicio][colInicio] = 1;
+        tablero[filaFin][colFin] = 1;
+        
+        if (camino && camino.length >= minLongitud && camino.length <= maxLongitud) {
+            if (caminoValido(camino, tablero, caminos)) {
+                caminos.push(camino);
+                
+                for (const [fila, col] of camino) {
+                    celdasOcupadas.add(`${fila},${col}`);
                 }
             }
-        }
-        
-        // Si no hay suficientes nodos libres, terminar
-        if (nodosDisponibles.length < 2) {
-            break;
-        }
-        
-        // Seleccionar inicio y fin aleatorios
-        const indiceInicio = generarEnteroAleatorio(0, nodosDisponibles.length - 1);
-        const nodoInicio = nodosDisponibles[indiceInicio];
-        
-        // Remover el nodo inicio
-        nodosDisponibles.splice(indiceInicio, 1);
-        
-        const indiceFin = generarEnteroAleatorio(0, nodosDisponibles.length - 1);
-        const nodoFinal = nodosDisponibles[indiceFin];
-        
-        // Buscar camino con límite de profundidad
-        const camino = DFS(tablero, nodoInicio, nodoFinal, maxLongitudCamino);
-        
-        // Validar longitud mínima y validez
-        if (camino.length >= 3 && camino.length <= maxLongitudCamino && caminoValido(camino, tablero)) {
-            caminos.push(camino);
-            
-            // Marcar el tablero DESPUÉS de validar para que DFS funcione
-            for (let i = 0; i < camino.length; i++) {
-                const [fila, col] = camino[i];
-                tablero[fila][col] = 1; // Marcar como ocupado para próximos caminos
-            }
-        }
-    }
-    
-    // Resetear el tablero para que dibujar() pueda usarlo
-    for (let i = 0; i < tablero.length; i++) {
-        for (let j = 0; j < tablero[i].length; j++) {
-            tablero[i][j] = 0;
         }
     }
     
@@ -177,65 +170,96 @@ export function espaciosLibres(tablero) {
     return vectorLibres;
 }
 
-
-
-
-function caminoValido(camino, tablero){
-    if (camino.length <= 6) return true; // camino muy corto
-    
-    const direccion = calcularDireccion(camino);
-    let actual = camino[camino.length - 1]; // ultimo
-    
+function caminoValido(camino, tablero, otrosCaminos) {
     const posicionesCamino = new Set();
     for (const [fila, col] of camino) {
-        posicionesCamino.add(`${fila},${col}`);
+        const key = `${fila},${col}`;
+        if (posicionesCamino.has(key)) {
+            return false;
+        }
+        posicionesCamino.add(key);
     }
     
-    // Límite de pasos para evitar loop infinito
-    const maxPasos = tablero.length * 2;
-    let pasos = 0;
-    
-    // avanzar en la direccion de la punta
-    while (pasos < maxPasos) {
-        pasos++;
-        
-        let siguiente;
-        if (direccion === 1) {
-            // Arriba
-            siguiente = [actual[0] - 1, actual[1]];
-        } else if (direccion === 2) {
-            // Derecha
-            siguiente = [actual[0], actual[1] + 1];
-        } else if (direccion === 3) {
-            // Abajo
-            siguiente = [actual[0] + 1, actual[1]];
-        } else if (direccion === 4) {
-            // Izquierda
-            siguiente = [actual[0], actual[1] - 1];
-        } else {
-            return true; // cualquier otra asumimos válido
+    for (const otroCamino of otrosCaminos) {
+        for (const [fila, col] of otroCamino) {
+            const key = `${fila},${col}`;
+            if (posicionesCamino.has(key)) {
+                return false;
+            }
         }
-        
-        // verificar si sale del tablero
-        if (siguiente[0] < 0 || siguiente[0] >= tablero.length || 
-            siguiente[1] < 0 || siguiente[1] >= tablero[0].length) {
-            return true; // salio sin chocar
-        }
-        
-        const siguienteKey = `${siguiente[0]},${siguiente[1]}`;
-        if (posicionesCamino.has(siguienteKey)) {
-            return false; // Choca con su propio cuerpo
-        }
-        
-        // Si hay obstáculo (otra flecha), válido
-        if (tablero[siguiente[0]][siguiente[1]] !== 0) {
-            return true;
-        }
-        
-        // Celda vacía, seguir avanzando
-        actual = siguiente;
     }
     
-    // Si llegamos aquí, asumimos válido (no chocó en maxPasos)
+    const direccion = calcularDireccion(camino);
+    const punta = camino[camino.length - 1];
+    
+    for (const otroCamino of otrosCaminos) {
+        const otraDireccion = calcularDireccion(otroCamino);
+        const otraPunta = otroCamino[otroCamino.length - 1];
+        
+        let celdaEnDireccion;
+        if (direccion === 1) celdaEnDireccion = [punta[0] - 1, punta[1]];
+        else if (direccion === 2) celdaEnDireccion = [punta[0], punta[1] + 1];
+        else if (direccion === 3) celdaEnDireccion = [punta[0] + 1, punta[1]];
+        else if (direccion === 4) celdaEnDireccion = [punta[0], punta[1] - 1];
+        else continue;
+        
+        let otraCeldaEnDireccion;
+        if (otraDireccion === 1) otraCeldaEnDireccion = [otraPunta[0] - 1, otraPunta[1]];
+        else if (otraDireccion === 2) otraCeldaEnDireccion = [otraPunta[0], otraPunta[1] + 1];
+        else if (otraDireccion === 3) otraCeldaEnDireccion = [otraPunta[0] + 1, otraPunta[1]];
+        else if (otraDireccion === 4) otraCeldaEnDireccion = [otraPunta[0], otraPunta[1] - 1];
+        else continue;
+        
+        if (celdaEnDireccion[0] === otraPunta[0] && celdaEnDireccion[1] === otraPunta[1] &&
+            otraCeldaEnDireccion[0] === punta[0] && otraCeldaEnDireccion[1] === punta[1]) {
+            return false;
+        }
+    }
+    
     return true;
+}
+
+function hayFlechaContraria(posicionPunta, direccion, todosCaminos) {
+    // Calcular la posición inmediatamente frente a la punta
+    let posicionFrente;
+    let direccionContraria;
+    
+    if (direccion === 1) {
+        // Arriba -> verificar celda arriba, debe apuntar abajo (3)
+        posicionFrente = [posicionPunta[0] - 1, posicionPunta[1]];
+        direccionContraria = 3;
+    } else if (direccion === 2) {
+        // Derecha -> verificar celda derecha, debe apuntar izquierda (4)
+        posicionFrente = [posicionPunta[0], posicionPunta[1] + 1];
+        direccionContraria = 4;
+    } else if (direccion === 3) {
+        // Abajo -> verificar celda abajo, debe apuntar arriba (1)
+        posicionFrente = [posicionPunta[0] + 1, posicionPunta[1]];
+        direccionContraria = 1;
+    } else if (direccion === 4) {
+        // Izquierda -> verificar celda izquierda, debe apuntar derecha (2)
+        posicionFrente = [posicionPunta[0], posicionPunta[1] - 1];
+        direccionContraria = 2;
+    } else {
+        return false;
+    }
+    
+    // Verificar si algún camino existente tiene su punta en esa posición y apunta en dirección contraria
+    for (const otroCamino of todosCaminos) {
+        if (otroCamino.length === 0) continue;
+        
+        const otraPunta = otroCamino[otroCamino.length - 1];
+        
+        // Si la punta del otro camino está en la posición frente a nosotros
+        if (otraPunta[0] === posicionFrente[0] && otraPunta[1] === posicionFrente[1]) {
+            const otraDireccion = calcularDireccion(otroCamino);
+            
+            // Si apunta en dirección contraria, hay conflicto
+            if (otraDireccion === direccionContraria) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
