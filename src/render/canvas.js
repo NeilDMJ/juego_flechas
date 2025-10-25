@@ -3,6 +3,8 @@
  */
 
 import { dibujarPuntaFlecha } from './arrows.js';
+import { generarEnteroAleatorio } from '../core/utils.js';
+import { espaciosLibres , generarCaminos} from '../core/pathfinding.js';
 
 const selectFilas = document.getElementById("tamaño");
 const color = document.getElementById("color");
@@ -46,4 +48,14 @@ export function dibujar(ctx, centros, tablero, camino) {
             console.log(`Saltando (celda ya ocupada)`);
         }
     }
+}
+
+export function rellenarConflechas(ctx, centros, tablero) {
+    // Generar menos caminos para tableros pequeños, más para grandes
+    const maxCaminos = Math.floor(tablero.length / 2) + 3;
+    const caminos = generarCaminos(tablero, maxCaminos);
+    
+    caminos.forEach(camino => {
+        dibujar(ctx, centros, tablero, camino);
+    });
 }

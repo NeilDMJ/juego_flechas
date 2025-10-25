@@ -3,7 +3,7 @@ import { generarTablero } from './core/tablero.js';
 import { generarEnteroAleatorio } from './core/utils.js';
 import { canvas, color, ctx, getBloqueSize, selectFilas } from './render/canvas.js';
 import { dibujarCuadricula, dibujarCentrosDeCeldas } from './render/grid.js';
-import { dibujar} from './render/canvas.js';
+import { rellenarConflechas} from './render/canvas.js';
 
 function iniciarJuego() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -32,13 +32,13 @@ function iniciarJuego() {
 
     let camino = buscarCaminoConLongitud(tablero, coordenadasInicio, coordenadasFin, {
         maxLongitud: tablero.length * 2,
-        maxIntentos: 100
+        maxIntentos: 20
     });
     let caminos = [camino];
     console.log('Camino encontrado:', camino);
     console.log('Longitud del camino:', camino.length);
 
-    dibujar(ctx, centros,tablero, camino);
+    rellenarConflechas(ctx, centros,tablero, camino);
 }
 
 // Iniciar juego al cargar
