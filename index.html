@@ -6,16 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de Flechas</title>
     <link rel="stylesheet" href="estilos/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
     <div class="contenedor-principal">
         <div class="barra-opciones">
-            <div><label for="forma"><select name="forma" id="forma">
-                        <option value="Cuadrado">Cuadrado</option>
-                        <option value="Circulo">Circulo</option>
-                        <option value="Triangulo">Triangulo</option>
-                    </select></label></div>
+            <div>
+                <button id="reiniciar">Reiniciar</button>
+            </div>
             <div><label for="tamaño"><select name="tamaño" id="tamaño">
                         <option value="10" selected>Pequeño</option>
                         <option value="15" >Mediano</option>
@@ -27,6 +26,12 @@
                         <option value="blue">Azul</option>
                         <option value="black">Negro</option>
                     </select></label></div>
+            <div class="puntuacion">
+                <span>Puntos: </span><span id="puntos">0</span>
+            </div>
+            <div class="puntuacion">
+                <span>Flechas: </span><span id="flechas-restantes">0</span>
+            </div>
         </div>
         <div class="tablero-principal">
             <canvas id="lienzo" width="800" height="800"></canvas>

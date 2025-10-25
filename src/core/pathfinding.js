@@ -192,6 +192,29 @@ function caminoValido(camino, tablero, otrosCaminos) {
     const direccion = calcularDireccion(camino);
     const punta = camino[camino.length - 1];
     
+    const cuerpoSinPunta = camino.slice(0, -1);
+    const n = tablero.length;
+    
+    for (let distancia = 1; distancia < n; distancia++) {
+        let celdaTrayectoria;
+        if (direccion === 1) celdaTrayectoria = [punta[0] - distancia, punta[1]];
+        else if (direccion === 2) celdaTrayectoria = [punta[0], punta[1] + distancia];
+        else if (direccion === 3) celdaTrayectoria = [punta[0] + distancia, punta[1]];
+        else if (direccion === 4) celdaTrayectoria = [punta[0], punta[1] - distancia];
+        else break;
+        
+        if (celdaTrayectoria[0] < 0 || celdaTrayectoria[0] >= n || 
+            celdaTrayectoria[1] < 0 || celdaTrayectoria[1] >= n) {
+            break;
+        }
+        
+        for (const [filaC, colC] of cuerpoSinPunta) {
+            if (celdaTrayectoria[0] === filaC && celdaTrayectoria[1] === colC) {
+                return false;
+            }
+        }
+    }
+    
     const distanciaMinima = 3;
     
     for (const otroCamino of otrosCaminos) {
