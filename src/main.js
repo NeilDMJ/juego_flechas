@@ -4,8 +4,10 @@ import { generarEnteroAleatorio } from './core/utils.js';
 import { canvas, color, ctx, getBloqueSize, selectFilas, dibujar } from './render/canvas.js';
 import { dibujarCuadricula, dibujarCentrosDeCeldas } from './render/grid.js';
 import { rellenarConflechas} from './render/canvas.js';
-import { detectarFlechaClick, avanzarFlechaUnPaso } from './core/interaccion.js';
-import { guardarPuntuacion, obtenerMejoresPuntuaciones, mostrarMejoresPuntuaciones, borrarHistorial, esNuevoRecord } from './core/puntuacion.js';
+import { detectarFlechaClick } from './core/interaccion.js';
+import { actualizarPuntos, actualizarFlechasRestantes, resetearDisplays } from './core/ui.js';
+import { verificarVictoria } from './core/victoria.js';
+import { animarFlecha } from './core/animacion.js';
 
 let tablero, centros, caminos, columnas;
 let animacionActiva = false;
@@ -13,60 +15,7 @@ let reiniciarBtn = document.getElementById('reiniciar');
 let puntos = 0;
 let flechasEliminadas = 0;
 let flechasIniciales = 0;
-const puntosDisplay = document.getElementById('puntos');
-const flechasDisplay = document.getElementById('flechas-restantes');
 const sonidoFlecha = new Audio('recursos/whoosh-transitions-sfx-01-118227.mp3');
-
-function actualizarPuntos(puntosGanados) {
-    puntos += puntosGanados;
-    puntosDisplay.textContent = puntos;
-}
-
-function actualizarFlechasRestantes() {
-    flechasDisplay.textContent = caminos.length;
-}
-
-function verificarVictoria() {
-    if (caminos.length === 0 && !animacionActiva) {
-        const sonidoVictoria = new Audio('recursos/collect-points-190037.mp3');
-        sonidoVictoria.play();
-        
-        const eficiencia = Math.floor((flechasIniciales / (flechasEliminadas)) * 100);
-        const bonusEficiencia = eficiencia > 100 ? Math.floor((eficiencia - 100) * 10) : 10;
-        const puntosFinales = puntos + bonusEficiencia;
-        
-        guardarPuntuacion(puntosFinales, columnas);
-        
-        const esRecord = esNuevoRecord(puntosFinales);
-        
-        Swal.fire({
-            title: esRecord ? '¡Nuevo Record!' : 'Ganaste!',
-            html: `
-                <p>Has eliminado todas las flechas del tablero</p>
-                <hr>
-                <p><strong>Puntuación: ${puntos}</strong></p>
-                <p>Bonus eficiencia: +${bonusEficiencia}</p>
-                <p><strong>Total: ${puntosFinales} puntos</strong></p>
-                <p style="font-size: 0.9em; color: #666;">Eficiencia: ${eficiencia}%</p>
-                <hr>
-                ${mostrarMejoresPuntuaciones()}
-            `,
-            icon: 'success',
-            confirmButtonText: 'Jugar de nuevo',
-            confirmButtonColor: '#4CAF50',
-            showDenyButton: true,
-            denyButtonText: 'Borrar historial',
-            denyButtonColor: '#d33'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                iniciarJuego();
-            } else if (result.isDenied) {
-                borrarHistorial();
-                Swal.fire('Historial borrado', '', 'info');
-            }
-        });
-    }
-}
 
 function iniciarJuego() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -75,7 +24,7 @@ function iniciarJuego() {
     
     puntos = 0;
     flechasEliminadas = 0;
-    puntosDisplay.textContent = puntos;
+    resetearDisplays();
 
     console.log(`Iniciando juego con tamaño: ${columnas}x${columnas}, BLOQUE_TAM: ${BLOQUE_TAM}`);
 
@@ -107,7 +56,7 @@ function iniciarJuego() {
     });
     
     flechasIniciales = caminos.length;
-    actualizarFlechasRestantes();
+    actualizarFlechasRestantes(caminos.length);
     
     console.log('inicio');
 }
@@ -143,48 +92,18 @@ canvas.addEventListener('click', (event) => {
         
         animacionActiva = true;
         sonidoFlecha.play();
-        const intervalo = setInterval(() => {
-            const caminoActual = caminos[indice];
+        
+        animarFlecha(indice, caminos, tablero, ctx, columnas, (puntosGanados) => {
+            animacionActiva = false;
             
-            if (!caminoActual) {
-                clearInterval(intervalo);
-                animacionActiva = false;
-                return;
-            }
-            
-            const nuevoCamino = avanzarFlechaUnPaso(caminoActual, tablero, caminos);
-            
-            if (nuevoCamino === null) {
-                console.log(`Flecha ${indice} desapareció del tablero`);
-                
-                const puntosGanados = caminoActual.length * 10;
-                actualizarPuntos(puntosGanados);
+            if (puntosGanados !== null && puntosGanados > 0) {
+                puntos += puntosGanados;
+                actualizarPuntos(puntos);
                 flechasEliminadas++;
                 
-                caminos.splice(indice, 1);
-                actualizarFlechasRestantes();
-                
-                clearInterval(intervalo);
-                animacionActiva = false;
-                
-                verificarVictoria();
-            } else if (nuevoCamino === caminoActual) {
-                console.log('La flecha no puede avanzar más');
-                clearInterval(intervalo);
-                animacionActiva = false;
-            } else {
-                caminos[indice] = nuevoCamino;
+                verificarVictoria(caminos, animacionActiva, puntos, flechasIniciales, flechasEliminadas, columnas, iniciarJuego);
             }
-            
-            const BLOQUE_TAM = getBloqueSize();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            centros = dibujarCentrosDeCeldas(ctx, BLOQUE_TAM, columnas, columnas);
-            tablero = generarTablero(columnas);
-            
-            caminos.forEach(c => {
-                dibujar(ctx, centros, tablero, c);
-            });
-        }, 30);
+        });
     } else if (animacionActiva) {
         console.log('Ya hay una animación en curso');
     } else {
